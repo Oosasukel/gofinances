@@ -1,8 +1,45 @@
 import React from 'react';
+import { FlatList } from 'react-native';
+import { getBottomSpace } from 'react-native-iphone-x-helper';
 import { HighlightCard } from '../../components/HighlightCard';
+import {
+  TransactionCard,
+  TransactionCardData,
+} from '../../components/TransactionCard';
 import * as S from './styles';
 
+export interface DataListProps extends TransactionCardData {
+  id: string;
+}
+
 export const Dashboard = () => {
+  const data: DataListProps[] = [
+    {
+      id: '1',
+      type: 'positive',
+      title: 'Desenvolvimento de site',
+      amount: 'R$ 12.000,00',
+      date: '13/04/2020',
+      category: { name: 'Vendas', icon: 'dollar-sign' },
+    },
+    {
+      id: '2',
+      type: 'negative',
+      title: 'Hamburgueria Pizzy',
+      amount: 'R$ 59,00',
+      date: '10/04/2020',
+      category: { name: 'Alimentação', icon: 'coffee' },
+    },
+    {
+      id: '3',
+      type: 'negative',
+      title: 'Aluguel do apartamento',
+      amount: 'R$ 1.200,00',
+      date: '27/03/2020',
+      category: { name: 'Casa', icon: 'shopping-bag' },
+    },
+  ];
+
   return (
     <S.Container>
       <S.Header>
@@ -44,6 +81,18 @@ export const Dashboard = () => {
           type='total'
         />
       </S.HighlightCards>
+
+      <S.Transactions>
+        <S.Title>Listagem</S.Title>
+
+        <S.TransactionList
+          data={data}
+          keyExtractor={(item) => (item as DataListProps).id}
+          renderItem={({ item }) => (
+            <TransactionCard data={item as DataListProps} />
+          )}
+        />
+      </S.Transactions>
     </S.Container>
   );
 };
