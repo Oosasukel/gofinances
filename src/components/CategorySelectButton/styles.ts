@@ -6,8 +6,9 @@ import {
   getStatusBarHeight,
 } from 'react-native-iphone-x-helper';
 import { TextInput } from 'react-native';
+import { RectButton } from 'react-native-gesture-handler';
 
-export const Container = styled.TouchableOpacity.attrs({
+export const Container = styled(RectButton).attrs({
   activeOpacity: 0.7,
 })`
   background-color: ${({ theme }) => theme.colors.shape};
