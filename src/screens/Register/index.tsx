@@ -41,11 +41,13 @@ export const Register = () => {
   } = useForm<RegisterData>({
     resolver: yupResolver(schema),
   });
-  const dataKey = '@gofinances:transactions';
 
-  const handleTransactionsTypeSelect = useCallback((type: 'up' | 'down') => {
-    setTransactionType(type);
-  }, []);
+  const handleTransactionsTypeSelect = useCallback(
+    (type: 'positive' | 'negative') => {
+      setTransactionType(type);
+    },
+    []
+  );
 
   const handleCloseSelectCategoryModal = useCallback(() => {
     setCategoryModalOpen(false);
@@ -66,12 +68,14 @@ export const Register = () => {
         id: String(uuid.v4()),
         name: form.name,
         amount: form.amount,
-        transactionType,
+        type: transactionType,
         category: category.key,
         date: new Date(),
       };
 
       try {
+        const dataKey = '@gofinances:transactions';
+
         const data = await AsyncStorage.getItem(dataKey);
         const currentData = data ? JSON.parse(data) : [];
 
@@ -124,14 +128,14 @@ export const Register = () => {
               <TransactionTypeButton
                 title='Income'
                 type='up'
-                onPress={() => handleTransactionsTypeSelect('up')}
-                isActive={transactionType === 'up'}
+                onPress={() => handleTransactionsTypeSelect('positive')}
+                isActive={transactionType === 'positive'}
               />
               <TransactionTypeButton
                 title='Outcome'
                 type='down'
-                onPress={() => handleTransactionsTypeSelect('down')}
-                isActive={transactionType === 'down'}
+                onPress={() => handleTransactionsTypeSelect('negative')}
+                isActive={transactionType === 'negative'}
               />
             </S.TransactionsTypes>
 
