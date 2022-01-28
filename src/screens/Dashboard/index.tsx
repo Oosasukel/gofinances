@@ -7,6 +7,8 @@ import {
 } from '../../components/TransactionCard';
 import * as S from './styles';
 import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator } from 'react-native';
+import { useTheme } from 'styled-components';
 
 export interface DataListProps extends TransactionCardData {
   id: string;
@@ -23,8 +25,10 @@ interface HighlightData {
 }
 
 export const Dashboard = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [transactions, SetTransactions] = useState<DataListProps[]>([]);
   const [highlightData, setHighlightData] = useState({} as HighlightData);
+  const theme = useTheme();
 
   const loadTransactions = useCallback(async () => {
     const dataKey = '@gofinances:transactions';
@@ -85,6 +89,8 @@ export const Dashboard = () => {
         }),
       },
     });
+
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -99,59 +105,67 @@ export const Dashboard = () => {
 
   return (
     <S.Container>
-      <S.Header>
-        <S.UserWrapper>
-          <S.UserInfo>
-            <S.Photo
-              source={{
-                uri: 'https://avatars.githubusercontent.com/u/58633356?v=4',
-              }}
+      {isLoading ? (
+        <S.LoadContainer>
+          <ActivityIndicator color={theme.colors.primary} size='large' />
+        </S.LoadContainer>
+      ) : (
+        <>
+          <S.Header>
+            <S.UserWrapper>
+              <S.UserInfo>
+                <S.Photo
+                  source={{
+                    uri: 'https://avatars.githubusercontent.com/u/58633356?v=4',
+                  }}
+                />
+
+                <S.User>
+                  <S.UserGreeting>Olá,</S.UserGreeting>
+                  <S.UserName>Rodrigo</S.UserName>
+                </S.User>
+              </S.UserInfo>
+
+              <S.LogoutButton onPress={() => {}}>
+                <S.Icon name='power' />
+              </S.LogoutButton>
+            </S.UserWrapper>
+          </S.Header>
+
+          <S.HighlightCards>
+            <HighlightCard
+              amount={highlightData.entries.amount}
+              lastTransaction='Última entrada dia 13 de abril'
+              title='Entradas'
+              type='up'
             />
+            <HighlightCard
+              amount={highlightData.expenses.amount}
+              lastTransaction='Última saída dia 13 de abril'
+              title='Saídas'
+              type='down'
+            />
+            <HighlightCard
+              amount={highlightData.total.amount}
+              lastTransaction='01 à 16 de abril'
+              title='Total'
+              type='total'
+            />
+          </S.HighlightCards>
 
-            <S.User>
-              <S.UserGreeting>Olá,</S.UserGreeting>
-              <S.UserName>Rodrigo</S.UserName>
-            </S.User>
-          </S.UserInfo>
+          <S.Transactions>
+            <S.Title>Listagem</S.Title>
 
-          <S.LogoutButton onPress={() => {}}>
-            <S.Icon name='power' />
-          </S.LogoutButton>
-        </S.UserWrapper>
-      </S.Header>
-
-      <S.HighlightCards>
-        <HighlightCard
-          amount={highlightData.entries.amount}
-          lastTransaction='Última entrada dia 13 de abril'
-          title='Entradas'
-          type='up'
-        />
-        <HighlightCard
-          amount={highlightData.expenses.amount}
-          lastTransaction='Última saída dia 13 de abril'
-          title='Saídas'
-          type='down'
-        />
-        <HighlightCard
-          amount={highlightData.total.amount}
-          lastTransaction='01 à 16 de abril'
-          title='Total'
-          type='total'
-        />
-      </S.HighlightCards>
-
-      <S.Transactions>
-        <S.Title>Listagem</S.Title>
-
-        <S.TransactionList
-          data={transactions}
-          keyExtractor={(item) => (item as DataListProps).id}
-          renderItem={({ item }) => (
-            <TransactionCard data={item as DataListProps} />
-          )}
-        />
-      </S.Transactions>
+            <S.TransactionList
+              data={transactions}
+              keyExtractor={(item) => (item as DataListProps).id}
+              renderItem={({ item }) => (
+                <TransactionCard data={item as DataListProps} />
+              )}
+            />
+          </S.Transactions>
+        </>
+      )}
     </S.Container>
   );
 };
