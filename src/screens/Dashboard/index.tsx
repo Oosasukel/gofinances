@@ -16,6 +16,7 @@ export interface DataListProps extends TransactionCardData {
 
 interface HighlightProps {
   amount: string;
+  lastTransaction: string;
 }
 
 interface HighlightData {
@@ -29,6 +30,27 @@ export const Dashboard = () => {
   const [transactions, SetTransactions] = useState<DataListProps[]>([]);
   const [highlightData, setHighlightData] = useState({} as HighlightData);
   const theme = useTheme();
+
+  const getLastTransactionDate = useCallback(
+    (collection: DataListProps[], type: 'positive' | 'negative') => {
+      const lastTransaction = new Date(
+        Math.max.apply(
+          Math,
+          collection
+            .filter((transaction: DataListProps) => transaction.type === type)
+            .map((transaction: DataListProps) =>
+              new Date(transaction.date).getTime()
+            )
+        )
+      );
+
+      return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString(
+        'pt-BR',
+        { month: 'long' }
+      )}`;
+    },
+    []
+  );
 
   const loadTransactions = useCallback(async () => {
     const dataKey = '@gofinances:transactions';
@@ -69,24 +91,38 @@ export const Dashboard = () => {
     );
 
     SetTransactions(transactionsFormatted);
+
+    const lastTransactionEntries = getLastTransactionDate(
+      transactionsSaved,
+      'positive'
+    );
+    const lastTransactionExpenses = getLastTransactionDate(
+      transactionsSaved,
+      'negative'
+    );
+    const totalInterval = `01 a ${lastTransactionExpenses}`;
+
     setHighlightData({
       expenses: {
         amount: expenseTotal.toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }),
+        lastTransaction: `Última entrada dia ${lastTransactionEntries}`,
       },
       entries: {
         amount: entriesTotal.toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }),
+        lastTransaction: `Última saída dia ${lastTransactionExpenses}`,
       },
       total: {
         amount: (entriesTotal - expenseTotal).toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }),
+        lastTransaction: totalInterval,
       },
     });
 
@@ -95,6 +131,8 @@ export const Dashboard = () => {
 
   useEffect(() => {
     loadTransactions();
+
+    // AsyncStorage.removeItem('@gofinances:transactions');
   }, []);
 
   useFocusEffect(
@@ -135,19 +173,19 @@ export const Dashboard = () => {
           <S.HighlightCards>
             <HighlightCard
               amount={highlightData.entries.amount}
-              lastTransaction='Última entrada dia 13 de abril'
+              lastTransaction={highlightData.entries.lastTransaction}
               title='Entradas'
               type='up'
             />
             <HighlightCard
               amount={highlightData.expenses.amount}
-              lastTransaction='Última saída dia 13 de abril'
+              lastTransaction={highlightData.expenses.lastTransaction}
               title='Saídas'
               type='down'
             />
             <HighlightCard
               amount={highlightData.total.amount}
-              lastTransaction='01 à 16 de abril'
+              lastTransaction={highlightData.total.lastTransaction}
               title='Total'
               type='total'
             />
