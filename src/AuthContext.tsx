@@ -54,6 +54,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         );
         const userInfo = await response.json();
 
+        console.log(userInfo);
+
         setUser({
           email: userInfo.email,
           id: userInfo.id,
